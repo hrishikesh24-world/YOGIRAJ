@@ -1,0 +1,1 @@
+import { PrismaClient } from '@prisma/client'; const prisma = new PrismaClient(); async function main() { await prisma.business.updateMany({ data: { name: 'YOGIRAJ' } }); console.log('Updated DB'); } main().catch(console.error).finally(() => prisma.$disconnect());

@@ -26,6 +26,20 @@ export async function deleteTransaction(transactionId: string) {
 
   for (const t of allTxs) {
     const prev = currentBalance;
+
+    if (t.type === "OPENING_BALANCE" || t.type === "BALANCE_ADJUSTMENT") {
+      // Manual adjustments force the balance to their specific amount
+      currentBalance = t.newBalance;
+      
+      if (t.previousBalance !== prev) {
+        await prisma.transaction.update({
+          where: { id: t.id },
+          data: { previousBalance: prev }
+        });
+      }
+      continue;
+    }
+
     const billed = t.deliveryAmount || 0;
     const paid = t.paymentAmount || 0;
     currentBalance = prev + billed - paid;

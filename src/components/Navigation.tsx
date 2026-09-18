@@ -40,7 +40,7 @@ export function Navigation() {
           <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
             <Droplets className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-gray-900 text-lg">Jal Seva</span>
+          <span className="font-bold text-gray-900 text-lg">YOGIRAJ</span>
         </div>
         <Link href="/settings" className="ml-auto p-2">
           <Settings className="w-5 h-5 text-gray-500" />
@@ -89,7 +89,7 @@ export function Navigation() {
             <Droplets className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-bold text-white text-sm">Jal Seva</p>
+            <p className="font-bold text-white text-sm">YOGIRAJ</p>
             <p className="text-slate-400 text-xs">Business Manager</p>
           </div>
         </div>

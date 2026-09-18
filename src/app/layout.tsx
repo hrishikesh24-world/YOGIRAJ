@@ -8,7 +8,7 @@ import { getServerSession } from "next-auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Jal Seva — Water Can Business",
+  title: "YOGIRAJ — Water Can Business",
   description: "Manage your water can delivery business",
   manifest: "/manifest.json",
 };

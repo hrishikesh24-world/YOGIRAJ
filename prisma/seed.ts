@@ -19,7 +19,7 @@ async function main() {
       name: 'Admin',
       business: {
         create: {
-          name: 'Aqua Fresh Deliveries',
+          name: 'YOGIRAJ',
           phone: '9876543210',
           address: '123 Water St, Spring City',
           defaultPrice: 40,

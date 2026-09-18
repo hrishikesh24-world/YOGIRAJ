@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Droplets, IndianRupee, TrendingDown, Users, Plus } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import DeleteTransactionButton from "./customers/[id]/DeleteTransactionButton";
 
 export default async function Dashboard() {
   const session = await getServerSession();
@@ -70,7 +71,7 @@ export default async function Dashboard() {
         ) : (
           <div className="divide-y divide-gray-50">
             {todayTxs.map((t) => (
-              <div key={t.id} className="flex items-center justify-between px-4 py-3">
+              <div key={t.id} className="flex items-center justify-between px-4 py-3 group">
                 <div>
                   <p className="font-semibold text-gray-900">{t.customer.name}</p>
                   <p className="text-xs text-gray-500">
@@ -80,11 +81,16 @@ export default async function Dashboard() {
                     {!t.cansDelivered && !t.paymentAmount ? t.type : ""}
                   </p>
                 </div>
-                <div className="text-right">
-                  {t.deliveryAmount ? <p className="font-bold text-gray-900">₹{t.deliveryAmount}</p> : null}
-                  <p className={`text-xs font-medium ${t.newBalance > 0 ? "text-red-500" : "text-emerald-600"}`}>
-                    Bal: {t.newBalance < 0 ? `₹${Math.abs(t.newBalance)} (Adv)` : `₹${t.newBalance}`}
-                  </p>
+                <div className="flex items-center gap-4 text-right">
+                  <div>
+                    {t.deliveryAmount ? <p className="font-bold text-gray-900">₹{t.deliveryAmount}</p> : null}
+                    <p className={`text-xs font-medium ${t.newBalance > 0 ? "text-red-500" : "text-emerald-600"}`}>
+                      Bal: {t.newBalance < 0 ? `₹${Math.abs(t.newBalance)} (Adv)` : `₹${t.newBalance}`}
+                    </p>
+                  </div>
+                  <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <DeleteTransactionButton id={t.id} requireConfirm={false} icon="minus" />
+                  </div>
                 </div>
               </div>
             ))}

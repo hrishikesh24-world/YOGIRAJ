@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Droplets, Phone, MapPin, FileText, Plus } from "lucide-react";
+import { ArrowLeft, Droplets, Phone, MapPin, FileText, Plus, Pencil } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import DeleteTransactionButton from "./DeleteTransactionButton";
@@ -10,6 +10,7 @@ const TYPE_LABELS: Record<string, string> = {
   PAYMENT: "Payment",
   DELIVERY_AND_PAYMENT: "Delivery + Payment",
   OPENING_BALANCE: "Opening Balance",
+  BALANCE_ADJUSTMENT: "Balance Adjusted",
 };
 
 export default async function CustomerDetailPage({
@@ -52,6 +53,13 @@ export default async function CustomerDetailPage({
             )}
           </p>
         </div>
+        <Link
+          href={`/customers/${id}/edit`}
+          className="flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition-colors"
+        >
+          <Pencil className="w-4 h-4" />
+          Edit
+        </Link>
       </div>
 
       {/* Action buttons */}
@@ -173,7 +181,7 @@ export default async function CustomerDetailPage({
                       : `₹${t.newBalance}`}
                   </td>
                   <td className="px-3 py-3">
-                    <DeleteTransactionButton id={t.id} />
+                    <DeleteTransactionButton id={t.id} requireConfirm={false} icon="minus" />
                   </td>
                 </tr>
               ))}
@@ -225,7 +233,7 @@ export default async function CustomerDetailPage({
                       ? `₹${Math.abs(t.newBalance)} Adv`
                       : `₹${t.newBalance}`}
                   </p>
-                  <DeleteTransactionButton id={t.id} />
+                  <DeleteTransactionButton id={t.id} requireConfirm={false} icon="minus" />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 text-sm">
