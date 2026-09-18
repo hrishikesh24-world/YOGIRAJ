@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  business  Business?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Business {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id])
+  name         String
+  phone        String?
+  address      String?
+  defaultPrice Float      @default(40)
+  currency     String     @default("INR")
+  customers    Customer[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Customer {
+  id             String        @id @default(cuid())
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id])
+  name           String
+  phone          String
+  address        String?
+  area           String?
+  notes          String?
+  isActive       Boolean       @default(true)
+  defaultPrice   Float?
+  balance        Float         @default(0) // Positive means they owe money
+  totalCans      Int           @default(0)
+  totalBilled    Float         @default(0)
+  totalCollected Float         @default(0)
+  transactions   Transaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+  type            String   // "DELIVERY", "PAYMENT", "OPENING_BALANCE"
+  date            DateTime @default(now())
+  
+  cansDelivered   Int?
+  pricePerCan     Float?
+  deliveryAmount  Float?
+  
+  paymentAmount   Float?
+  paymentMethod   String?
+  
+  previousBalance Float
+  newBalance      Float
+  
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
