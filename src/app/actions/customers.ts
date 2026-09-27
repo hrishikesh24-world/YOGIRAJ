@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { safeRevalidatePath } from "@/lib/revalidate";
 
 export async function addCustomer(formData: FormData) {
   const name = formData.get("name") as string;
@@ -11,8 +11,30 @@ export async function addCustomer(formData: FormData) {
   const defaultPrice = parseFloat(formData.get("defaultPrice") as string) || 40;
   const openingBalance = parseFloat(formData.get("openingBalance") as string) || 0;
 
-  const business = await prisma.business.findFirst();
-  if (!business) throw new Error("Business not found");
+  // Auto-get or create business to guarantee DB consistency
+  let business = await prisma.business.findFirst();
+  if (!business) {
+    let user = await prisma.user.findFirst();
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          name: "Business Owner",
+          email: "admin@example.com",
+          password: "hashed_password",
+        }
+      });
+    }
+    business = await prisma.business.create({
+      data: {
+        userId: user.id,
+        name: "YOGIRAJ",
+        phone: "+91 98765 43210",
+        address: "Main Water Depot",
+        defaultPrice: 40,
+        currency: "INR"
+      }
+    });
+  }
 
   const customer = await prisma.customer.create({
     data: {
@@ -38,7 +60,9 @@ export async function addCustomer(formData: FormData) {
     });
   }
 
-  revalidatePath("/customers");
+  safeRevalidatePath("/customers");
+  safeRevalidatePath("/");
+  safeRevalidatePath("/outstanding");
   return { success: true, id: customer.id };
 }
 
@@ -64,8 +88,10 @@ export async function updateCustomer(id: string, data: {
     },
   });
 
-  revalidatePath("/customers");
-  revalidatePath(`/customers/${id}`);
+  safeRevalidatePath("/customers");
+  safeRevalidatePath(`/customers/${id}`);
+  safeRevalidatePath("/");
+  safeRevalidatePath("/outstanding");
   return { success: true };
 }
 
@@ -73,9 +99,9 @@ export async function deleteCustomer(id: string) {
   await prisma.transaction.deleteMany({ where: { customerId: id } });
   await prisma.customer.delete({ where: { id } });
 
-  revalidatePath("/customers");
-  revalidatePath("/");
-  revalidatePath("/outstanding");
+  safeRevalidatePath("/customers");
+  safeRevalidatePath("/");
+  safeRevalidatePath("/outstanding");
   return { success: true };
 }
 
@@ -101,8 +127,9 @@ export async function adjustBalance(customerId: string, newBalance: number, reas
     }),
   ]);
 
-  revalidatePath(`/customers/${customerId}`);
-  revalidatePath("/");
-  revalidatePath("/outstanding");
+  safeRevalidatePath(`/customers/${customerId}`);
+  safeRevalidatePath("/");
+  safeRevalidatePath("/outstanding");
+  safeRevalidatePath("/customers");
   return { success: true };
 }

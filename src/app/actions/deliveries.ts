@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { safeRevalidatePath } from "@/lib/revalidate";
 
 export async function addDelivery(data: {
   customerId: string;
@@ -62,10 +62,11 @@ export async function addDelivery(data: {
     }),
   ]);
 
-  revalidatePath("/");
-  revalidatePath("/deliveries");
-  revalidatePath("/customers");
-  revalidatePath("/outstanding");
+  safeRevalidatePath("/");
+  safeRevalidatePath("/deliveries");
+  safeRevalidatePath("/customers");
+  safeRevalidatePath(`/customers/${customerId}`);
+  safeRevalidatePath("/outstanding");
 
   return { success: true, newBalance };
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { safeRevalidatePath } from "@/lib/revalidate";
 
 export async function deleteTransaction(transactionId: string) {
   // Get transaction
@@ -67,9 +67,10 @@ export async function deleteTransaction(transactionId: string) {
     }
   });
 
-  revalidatePath("/customers");
-  revalidatePath(`/customers/${customerId}`);
-  revalidatePath("/");
+  safeRevalidatePath("/customers");
+  safeRevalidatePath(`/customers/${customerId}`);
+  safeRevalidatePath("/");
+  safeRevalidatePath("/outstanding");
   
   return { success: true };
 }
