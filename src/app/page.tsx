@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { Droplets, IndianRupee, TrendingDown, Users, Plus } from "lucide-react";
+import { Droplets, IndianRupee, TrendingDown, Users, Plus, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import DeleteTransactionButton from "./customers/[id]/DeleteTransactionButton";
@@ -15,19 +15,32 @@ export default async function Dashboard() {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const todayTxs = await prisma.transaction.findMany({
-    where: { date: { gte: today, lt: tomorrow } },
-    include: { customer: { select: { id: true, name: true } } },
-    orderBy: { date: "desc" },
-  });
+  let todayTxs: any[] = [];
+  let totalCansToday = 0;
+  let totalBilledToday = 0;
+  let totalCollectedToday = 0;
+  let totalOutstanding = 0;
+  let customersServedToday = 0;
+  let dbError = false;
 
-  const totalCansToday = todayTxs.reduce((acc, t) => acc + (t.cansDelivered ?? 0), 0);
-  const totalBilledToday = todayTxs.reduce((acc, t) => acc + (t.deliveryAmount ?? 0), 0);
-  const totalCollectedToday = todayTxs.reduce((acc, t) => acc + (t.paymentAmount ?? 0), 0);
+  try {
+    todayTxs = await prisma.transaction.findMany({
+      where: { date: { gte: today, lt: tomorrow } },
+      include: { customer: { select: { id: true, name: true } } },
+      orderBy: { date: "desc" },
+    });
 
-  const customersWithDues = await prisma.customer.findMany({ where: { balance: { gt: 0 } } });
-  const totalOutstanding = customersWithDues.reduce((acc, c) => acc + c.balance, 0);
-  const customersServedToday = new Set(todayTxs.map((t) => t.customerId)).size;
+    totalCansToday = todayTxs.reduce((acc, t) => acc + (t.cansDelivered ?? 0), 0);
+    totalBilledToday = todayTxs.reduce((acc, t) => acc + (t.deliveryAmount ?? 0), 0);
+    totalCollectedToday = todayTxs.reduce((acc, t) => acc + (t.paymentAmount ?? 0), 0);
+
+    const customersWithDues = await prisma.customer.findMany({ where: { balance: { gt: 0 } } });
+    totalOutstanding = customersWithDues.reduce((acc, c) => acc + c.balance, 0);
+    customersServedToday = new Set(todayTxs.map((t) => t.customerId)).size;
+  } catch (err) {
+    console.error("Database connection error on Dashboard:", err);
+    dbError = true;
+  }
 
   return (
     <div className="space-y-6">
@@ -35,6 +48,18 @@ export default async function Dashboard() {
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-0.5">{format(new Date(), "EEEE, dd MMMM yyyy")}</p>
       </div>
+
+      {dbError && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-bold">Database Connection Warning</p>
+            <p className="mt-0.5 text-amber-800">
+              Could not connect to database. Please make sure your <code className="bg-amber-100 px-1 rounded">DATABASE_URL</code> is added in Vercel Environment Variables and database migrations are run.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
@@ -73,7 +98,7 @@ export default async function Dashboard() {
             {todayTxs.map((t) => (
               <div key={t.id} className="flex items-center justify-between px-4 py-3 group">
                 <div>
-                  <p className="font-semibold text-gray-900">{t.customer.name}</p>
+                  <p className="font-semibold text-gray-900">{t.customer?.name || "Customer"}</p>
                   <p className="text-xs text-gray-500">
                     {t.cansDelivered ? `${t.cansDelivered} cans` : ""}
                     {t.cansDelivered && t.paymentAmount ? " · " : ""}

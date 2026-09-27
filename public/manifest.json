@@ -1,7 +1,7 @@
 {
-  "name": "Water Can Business",
-  "short_name": "WaterApp",
-  "description": "Manage water can deliveries",
+  "name": "YOGIRAJ — Water Can Business",
+  "short_name": "YOGIRAJ",
+  "description": "Manage water can deliveries and billing",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,12 +10,14 @@
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

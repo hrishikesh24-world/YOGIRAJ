@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET || "yogiraj_default_secret_key_2026_safe_fallback",
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -10,8 +11,6 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // For simplicity in this v1 single-owner app, we hardcode the admin login
-        // Alternatively, we could check the database.
         if (credentials?.username === "admin" && credentials?.password === "admin123") {
           return { id: "1", name: "Business Owner", email: "admin@example.com" };
         }
